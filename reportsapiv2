@@ -1,0 +1,528 @@
+FORMAT: 1A
+HOST: https://api.paysafe.com/reporting/v2/
+
+# Reporting API Reference
+
+Paysafe's Reporting API provides endpoints for querying and generating reports based on your payments history. You can extract the data to a report in .csv format. You can retrieve the following reports using the API:
+
+The reports you obtain from Paysafe contain data about your transactions that are more than 24 hours old. 
+
+> **Note:** The Ids of each report are in parenthesis. 
+
+For a detailed description on types of reports, please see [<b>Report Types</b>](https://prlocal-developer-paysafe-com.eu.paysafecorp.com/en/rest-apis/reports-api/report-types/) 
+
+# Prerequisites
+<a name="prereq" title="Prerequisites"></a>
+
+Below are the prerequisite steps for merchant onboarding: 
+
+1. The partner must contact the account manager to set up the account.
+2. Paysafe integrations team provides the authentication credentials after the merchant account set up is complete. 
+
+### Scope and Restrictions
+
+* All the APIs are RESTful.
+* The Direct Merchants and Platform Partners who possess the Shared API key will only use this API.
+* Onboarding reports are available only to Partners. 
+
+
+<a name="apikey" title="Authentication"></a>
+# Authentication 
+
+To use the Paysafe REST API, Paysafe must first set up its system for you 
+and then provide an API key. 
+
+Your API key looks something like this:
+ * Key ID – PartnerXYZ
+ * Key Password – B-tst1-0-51ed39e4-312d02345d3f123120881dff9bb4020a89e8ac44cdfdcecd702151182fdc952272661d290ab2e5849e31bb03deede7e
+
+HTTP Basic Authentication sends the case-sensitive API key. To use HTTP Basic Authentication, you must send the API key credentials using the Authorization header with every request. The Authorization header is constructed as follows:
+ 1. Combine the Key ID and Key Password into a string separated by a colon, for example: “Key ID:Key Password”.
+ 2. The resulting string literal is then encoded using Base64.
+ 3. The authorization method and the space (that is, “Basic”) are added before the encoded string.
+
+For example, using the Key ID and Password examples above, the header is formed as follows:
+
+`Authorization: Basic
+UGFydG5lclhZWjpCLXRzdDEtMC01MWVkMzllNC0zMTJkMDIzNDVkM2YxMjMxMjA4ODFkZmY5YmI0MDIwYTg5ZThhYzQ0Y2RmZGNlY2Q3MDIxNTExODJmZGM5NTIyNzI2NjFkMjkwYWIyZTU4NDllMzFiYjAzZGVlZGU3ZQ==`
+
+For additional details, refer to [Authentication](https://developer.paysafe.com/en/rest-apis/reference-information/important-integration-concepts/authentication/).
+
+> **Note:** Your Production API key will be different from your Test API key. Contact your account manager for details. You must keep your API keys safe and ensure that they are used appropriately for your needs.
+
+# Getting Started
+
+Click [here](https://prlocal-developer-paysafe-com.eu.paysafecorp.com/en/rest-apis/reports-api/getting-started/) for details on Reporting API
+
+
+# Going Live
+ 
+Once you are satisfied with your integration to the Test environment, you must repeat the configuration changes made to your Test account on your Production account.
+
+> **Note:** You cannot use your Test credentials to process transaction requests in the Production environment.
+
+### Go Live Checklist
+1. You must have a production account and an Onboarding Config ID for your production account.
+2. You must have the API Keys for the production environment.
+3. You must use the Production URL for your API calls.
+
+> **Note:** For items 1, 2, & 3, reach out to your account manager or <integrations@paysafe.com> for any issues.
+
+### Production URL
+To process live requests with Paysafe, use the following Production URL:
+
+`https://api.paysafe.com/reporting/v1/`
+
+For Example:
+
+`https://api.paysafe.com/reporting/v1/report-requests`
+
+### Test URL
+To process live requests with Paysafe, use the following Test URL:
+
+`https://api.test.paysafe.com/reporting/v1/`
+
+For Example:
+
+`https://api.test.paysafe.com/reporting/v1/report-requests`
+
+# Common Errors
+
+| HTTP Status | Error Code    | Error Message |Description |
+|-------------|---------------|-------------  |------------|
+|401                |5279           |Invalid Credentials|The authentication credentials are invalid.|
+|403                |5270           |Unauthorized access|Authorization does not contain requested permissions.|
+|400                |5068           |An invalid request was submitted.|Either you submitted a request that is missing a mandatory field, or the value of a field does not match the format expected.|
+|404                |5269           |Entity not found|Report does not exist with the given id.|
+|500                |1000           |Internal Error|An internal error occurred.|
+
+# API Specific Errors 
+
+| HTTP Status | Error Code    | Error Message |Description |
+|-------------|---------------|-------------  |------------|
+|400                |5269           |Entity not found|You have not subscribed to this report, or there are no active webhooks.|
+|400                |5068           |An invalid request was submitted.|Provide Both intervalStartTime and intervalEndTime Or Provide Nothing.|
+|400                |5068           |An invalid request was submitted.|intervalStartTime or intervalEndTime cannot be a Future date.|
+|400                |5068           |An invalid request was submitted.|intervalStartTime should be less than intervalEndTime|
+|400                |5068           |An invalid request was submitted.|intervalStartTime and intervalEndTime should be between X days.|
+|500                |11006          |Something went wrong!|Something went wrong!|
+|404                |11100          |Subscription does not exist with the given id.|Subscription does not exist with the given id.|
+|400                |11101          |Invalid emailConfig in Subscription.|Email Subscriptions are not yet supported.|
+|400                |11102          |Invalid webhookConfig in Subscription.|Webhook Config should be provided.|
+|400                |11103          |Invalid scheduleConfig in Subscription.|Empty scheduleConfig section is not Accepted. Either enter the scheduleConfig details or remove the section.|
+|400                |11104          |Invalid scheduleConfig in Subscription.|Only one of the daily, weekly, or monthly schedules can be specified.|
+|400                |11105          |Invalid scheduleConfig in Subscription.|Invalid scheduleConfig in Subscription.|
+|400                |11106          |Subscriptions active for a given preference.|Can't delete preference when subscriptions are active.|
+|400                |11107          |Invalid scheduleConfig in Subscription.|Unable to determine the scheduleType in scheduleConfig.|
+|404                |11001          |Report does not exist with given id.|Report does not exist with given id.|
+|404                |11201          |Report preference does not exist with the given id.|Report preference does not exist with the given id.|
+|404                |11301          |Invalid intervalStartTime/intervalEndTime in Report Request.|Invalid intervalStartTime/intervalEndTime in Report Request.|
+
+# Webhooks
+<a name="webhooks" title="Webhooks"></a>
+A Webhook is an HTTP callback that is triggered when an event takes place. 
+
+> **Note:** To receive webhooks from Paysafe, you must create a callback URL to receive the webhook that is triggered. 
+Paysafe will attempt a maximum of three times to deliver the report if your webhook is unreachable. You are responsible for ensuring its continued availability.
+
+You will receive the following webhook payload for the specified callback URL. Webhook will be delivered within 30 minutes from when the request is accepted. The payload contains a link from where you can download the report. The following payload sample illustrates this: 
+
+```
+{
+  "report": {
+    "status": "SUCCEEDED",
+    "files": [
+      "https://paysafe-ss-analytics-876548798765-ca-central-1-reports-qa.s3.ca-central-1.amazonaws.com/reportOutputs/2020_11/6cd9b563-65fa-460e-9052-c823d2d3f331/c31f2940-a47a-4130-9e4b-8d2e74ed953b.csv..."
+    ]
+  }
+}
+```
+> **Note:** You can download the reports for a pre-defined period (up to seven days). 
+```
+
+## Verify That the Service Is Accessible [GET /monitor]
+<a name="verifyservice" title="Verify Service"></a>
+
+This call returns a status of READY if the API is available.
+
++ Response 200 (application/json)
+
+  + Body
+    
+            {
+                "status" : "READY"
+            }
+
+
+
+# Group Subscriptions
+
+## Create Subscription [/report-configs/{reportId}]
+
+## Subscribe to a Report [POST /report-configs/{reportId}/subscriptions]
+<a name="subscribereport" title="Subscribe a Report"></a>
+
+Click **Subscribe to a Report** above to create a report subscription. 
+
+Use this API to subscribe for reports that you want to be delivered over HTTP endpoint (webhooks). When you subscribe to a report, a unique "subscriptionId" is returned in the response.<br/><br/>
+
+> **Notes:** 
+<ul>
+    <li>You have to use this unique subscriptionId to retrieve, update, and to unsubscribe from report.</li>
+    <li>You can use scheduleConfig to generate daily-reports, weekly-reports, and monthly-reports. scheduleConfig is an optional attribute.</li>
+    <li>Only one of section in scheduleConfig should be entered.</li>
+    <li>If schedule information is given and enabled, in response nextRun attribute is returned with next trigger time.</li>
+    <li>Create subscripiton will only run if scheduleconfig is enabled and all the required details are entered.</li>
+    <li>preferenceId is optional field. You can overide the behaviour of report by attaching your own preferenceId to subscription request.</li>
+</ul>
+
+> **Important:**
+
+Using this API, you can also create periodic subscriptions such as: <b>Daily Subscriptions</b>, <b>Weekly Subscriptions</b>, and <b>Monthly Subscriptions</b>. 
+
+See [Daily Subscription](#createdailysubscription), [Weekly Subscription](#createweeklysubscription), and [Monthly Subcription](#createmonthlysubscription) below to learn more on this. 
+
+
+
++ Parameters
+    
+    + reportId - This is the name of the report. 
+    
++ Attributes
+
+    + `preferencesId`: `optional` (string) - Attach the preferenceId of preference created if you want to update the default behavior of report.
+    
+    + `reportId`: `optional` (string) -  This is the name of the report.
+    
+    + `scheduleConfig`: -  Fill this section only if you want to schedule a report. 
+    
+    + `scheduleConfig.dailySchedule.enabled`: 
+        _true/false_
+        
+    + `scheduleConfig.monthlySchedule.dayOfMonth`:
+        _1-28 or L / L-1 / L-2_
+    
+    + `scheduleConfig.reportPeriod`: - The report period contains one of the three values: PREVIOUS_DAY, PREVIOUS_WEEK, PREVIOUS_MONTH.<br/>
+    
+        _PREVIOUS DAY: Start of previous day to End of previous day_
+        _PREVIOUS WEEK : Start of previous week's Monday till this week's Monday_
+        _PREVIOUS MONTH: Start of 1st last month to Start of 1st this month_
+
+    + `scheduleConfig.status`: - Resumes/Pauses the schedule.
+        _ENABLED/DISABLED_
+        
+    + `scheduleConfig.weeklySchedule.dayOfWeek` 
+        _MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY_
+        
+    + `webhookConfigwebhookUrls`: `mandatory` (string) - Mentions the list of webhook endpoints.
+        
+   
++ Request Subscribe to a Report (application/json)
+        
+    + Headers
+    
+            Authorization: Basic YOUR-BASE64-ENCODED-API-KEY
+
+    + Body
+
+            {
+                "name": "string",
+                "preferenceId": "string",
+                "scheduleConfig": {
+                "dailySchedule": {
+                "enabled": true
+                },
+                "monthlySchedule": {
+                "dayOfMonth": "string"
+                },
+                "reportPeriod": "PREVIOUS_DAY",
+                "status": "ENABLED",
+                "weeklySchedule": {
+                "dayOfWeek": "MONDAY"
+                }
+            },
+            "webhookConfig": {
+            "webhookUrls": [
+            "string"
+            ]
+            }
+        }
+
+            
++ Response 200 (application/json;charset=utf8)
+
+    + Headers
+    
+            Transfer-Encoding :chunked
+            Date:Tue, 27 Oct 2020 07:19:31 GMT
+            X-INTERNAL-CORRELATION-ID: a755ee28-e1dd-4b0a-8b72-955f7ae8a623
+            X-Application-Error-Code:  1000
+            X-Application-Status-Code: 1000
+            X-Application-Error-Message: Internal Error
+            X-Application-Error-Description: An internal error occurred
+
+    + Body
+
+            {
+                "name": "string",
+                "preferenceId": "string",
+                "reportId": "string",
+                "scheduleConfig": {
+                "dailySchedule": {
+                "enabled": true
+                },
+                "monthlySchedule": {
+                "dayOfMonth": "string"
+                },
+                "nextRun": "2021-04-19T10:19:07.879Z",
+                "reportPeriod": "PREVIOUS_DAY",
+                "status": "ENABLED",
+                "weeklySchedule": {
+                "dayOfWeek": "MONDAY"
+                }
+            },
+            "subscriptionId": "string",
+            "updatedTime": "string",
+            "webhookInfo": [
+            {
+            "status": "ENABLED",
+            "url": "string"
+            }
+            ]
+}
+
+
+## Get Subscription [/report - configs]
+
+### Get Subscriptions [GET /report-configs/{reportId}/subscriptions/{subscriptionId}]
+
+<a name="getsubscription" title="Get a List of Subscriptions"></a>
+Click **Get Subscriptions** above to retrieve a single subscription object.<br/>
+This API uses the subscriptionId returned in response when you subscribe for a report.
+
+> **Note:** The changes made to ScheduleConfig will reflect in the next scheduled trigger. 
+    
++ Parameters
+
+    + reportId - This is the name of the report. 
+   
+
++ Request Get Subscriptions (application/json)
+    
+    + Headers
+    
+            Authorization: Basic YOUR-BASE64-ENCODED-API-KEY
+            
++ Response 200 (application/json;charset=utf8)
+
+    + Headers
+    
+            Transfer-Encoding :chunked
+            Date:Tue, 27 Oct 2020 07:19:31 GMT
+            X-INTERNAL-CORRELATION-ID: a755ee28-e1dd-4b0a-8b72-955f7ae8a623
+            X-Application-Error-Code:  1000
+            X-Application-Status-Code: 1000
+            X-Application-Error-Message: Internal Error
+            X-Application-Error-Description: An internal error occurred
+
+    + Body
+
+        {
+            "creationTime": "string",
+            "name": "string",
+            "preferenceId": "string",
+            "reportId": "string",
+            "scheduleConfig": {
+            "dailySchedule": true,
+            "monthlySchedule": {
+            "dayOfMonth": "string"
+            },
+            "nextRun": "2021-04-16T11:47:23.360Z",
+            "reportPeriod": "PREVIOUS_DAY",
+            "status": "ENABLED",
+            "weeklySchedule": {
+            "dayOfWeek": "MONDAY"
+            }
+            },
+            "subscriptionId": "string",
+            "updatedTime": "string",
+            "webhookInfo": [
+                {
+                    "status": "ENABLED",
+                    "url": "string"
+                }
+            ]
+        }
+         
+
+## Update Subscription [/report-configs/{reportId}/subscriptions/{subscriptionId}]
+### Update Subscriptions [PUT /report-configs/{reportId}/subscriptions/{subscriptionId}]
+
+<a name="putsubscription" title="Create a new Subscription"></a>
+Click **Update Subscriptions** above to update a preferenceId to a report using the ID returned in the response to [the original request](#subscribereport).<br/>
+
+You can use this API to modify your existing subscriptions. Changes made to the ScheduleConfig reflects in the next scheduled trigger. The scheduleConfig of the report should be generated periodically without using the report-request API. 
+
+> **Notes:** 
+
+<ul>
+    <li> This API updates a single Subscription only.</li>
+    <li> Each time you pass a webhook URL in the request body, the newest one replaces the older ones. If you pass two webhook URLs, the first time (webhook url1, webhook url2) and then only one the next time (webhook url3), the request body retains the latest one. In this case, webhook url3.</li>  
+</ul>
+
++ Parameters
+
+    + reportId - This is the name of the report.<br/><br/> 
+    + subscriptionId - This is the subscription id of a report subscription.
+   
++ Request Update Subscriptions (application/json)
+    
+    + Headers
+    
+            Authorization: Basic YOUR-BASE64-ENCODED-API-KEY
+            
+    + Body
+        {
+            "name": "string",
+            "preferenceId": "string",
+            "scheduleConfig": {
+            "dailySchedule": {
+            "enabled": true
+            },
+            "monthlySchedule": {
+            "dayOfMonth": "string"
+            },
+            "reportPeriod": "PREVIOUS_DAY",
+            "status": "ENABLED",
+            "weeklySchedule": {
+            "dayOfWeek": "MONDAY"
+            }
+        },
+        "webhookConfig": {
+        "webhookUrls": [
+        "string"
+        ]
+        }
+        }
+        
+            
++ Response 200 (application/json;charset=utf8)
+
+    + Headers
+    
+            Transfer-Encoding:chunked
+            Date:Tue, 27 Oct 2020 07:19:31 GMT
+            X-INTERNAL-CORRELATION-ID: a755ee28-e1dd-4b0a-8b72-955f7ae8a623
+            X-Application-Error-Code:  1000
+            X-Application-Status-Code: 1000
+            X-Application-Error-Message: Internal Error
+            X-Application-Error-Description: An internal error occurred
+
+    + Body
+
+       {
+            "name": "string",
+            "preferenceId": "string",
+            "reportId": "string",
+            "scheduleConfig": {
+            "dailySchedule": true,
+            "monthlySchedule": {
+            "dayOfMonth": "string"
+                },
+            "nextRun": "2021-04-19T06:52:47.047Z",
+            "reportPeriod": "PREVIOUS_DAY",
+            "status": "ENABLED",
+            "weeklySchedule": {
+            "dayOfWeek": "MONDAY"
+                }
+            },
+            "subscriptionId": "string",
+            "updatedTime": "string",
+            "webhookInfo": [
+            {
+            "status": "ENABLED",
+            "url": "string"
+            }
+            ]
+        }   
+
+## Delete Subscription [/report-configs]
+### Unsubscribe from a Report [DELETE /report-configs/{reportId}/subscriptions/{subscriptionId}]
+<a name="unsubscribereport" title="Unsubscribe a Report"></a>
+
+Click **Unsubscribe from a Report** above to delete a preference to a subscribed report.
+
++ Parameters
+
+    + reportId: This is the name of the report.
+    + subscriptionId : This is the subscription id of a report subscription.
+    
+
++ Request Unsubscribe to a Report (application/json)
+
+    + Headers
+
+            Authorization: Basic YOUR-BASE64-ENCODED-API-KEY
+            
++ Response 204 (application/json;charset=utf8)
+
+     + Headers
+     
+            Transfer-Encoding: chunked
+            Date:Tue, 27 Oct 2020 07:19:31 GMT
+            X-INTERNAL-CORRELATION-ID: a755ee28-e1dd-4b0a-8b72-955f7ae8a623
+            X-Application-Error-Code:  1000
+            X-Application-Status-Code: 1000
+            X-Application-Error-Message: Internal Error
+            X-Application-Error-Description: An internal error occurred
+            
+# Group Report Requests
+
+## Submit Report [/report-requests]
+
+### Submit a Report Request [POST /report-requests]
+<a name="submitareportrequest" title="Submit a Report Request"></a>
+
+Click **Submit a Report Request** above to submit a request for a report. You should have already subscribed to a [report](#subscribereport) to submit this request.
+
+The following table describes the list of values for the attributes in this API:<br/>
+
+| Field | Description  |
+|-------|------------------|
+|includeFields|This is optional. These are the list of report headers you need in the report.|
+|intervalStartTime|This is optional.Report start date-time should be provided in milliseconds. Example: 1525744000000.|
+|intervalEndTime|This is optional.Report end date-time should be provided in milliseconds.|
+|reportId|This is mandatory. This is the name of the report.|
+|subscriptionId|This is mandatory. This is the subscription Id of the report subscription.|   
+
+> **Note:** You should specify intervalStartTime & intervalEndTime in milliseconds since epoch. Specify the date in milliseconds format. If you don't, it will default to the interval configured in ReportConfig. You must either specify both the start and end times or nothing at all. Entering either only the start or the end time will throw an error. For reference, you can refer to [milliseconds Converter](https://www.currentmillis.com/)
+
+Once you submit a report request, you instantly get an API response that it is accepted. Webhook will be delivered within 30 minutes from when the request is accepted.<br>
+
++ Parameters
+    
+    + reportId (string, required) - This is the name of the report.
+ 
+
+  
++ Request A Report Using a Report id (application/json)
+
+    
+            
+    + Headers
+
+            Authorization: "Basic YOUR-BASE64-ENCODED-API-KEY"
+    
+    
+     
++ Response 200 (application/json) 
+
+    + Headers
+    
+            Transfer-Encoding: chunked
+            Date:Tue, 27 Oct 2020 07:19:31 GMT
+            X-INTERNAL-CORRELATION-ID: a755ee28-e1dd-4b0a-8b72-955f7ae8a623
+            X-Application-Error-Code:  1000
+            X-Application-Status-Code: 1000
+            X-Application-Error-Message: Internal Error
+            X-Application-Error-Description: An internal error occurred

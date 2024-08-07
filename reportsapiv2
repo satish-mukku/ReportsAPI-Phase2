@@ -132,7 +132,7 @@ You will receive the following webhook payload for the specified callback URL. W
   "report": {
     "status": "SUCCEEDED",
     "files": [
-      "https://paysafe-ss-analytics-876548798765-ca-central-1-reports-qa.s3.ca-central-1.amazonaws.com/reportOutputs/2020_11/6cd9b563-65fa-460e-9052-c823d2d3f331/c31f2940-a47a-4130-9e4b-8d2e74ed953b.csv..."
+      "https://<bucket>-reports-qa.s3.ca-central-1.amazonaws.com/reportOutputs/2020_11/6cd9b563-65fa-460e-9052-c823d2d3f331/c31f2940-a47a-4130-9e4b-8d2e74ed953b.csv..."
     ]
   }
 }
